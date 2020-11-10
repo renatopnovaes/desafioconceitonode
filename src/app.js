@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
-// const { v4: uuid, validate: isUuid } = require('uuid');
+const { v4: uuid, validate: isUuid } = require('uuid');
 
 const app = express();
 
@@ -11,23 +10,76 @@ app.use(cors());
 const repositories = [];
 
 app.get("/repositories", (request, response) => {
-  // TODO
+ /*  const { title} = request.query;
+
+  const results = title
+    ? repositories.filter(repository => repository.title.includes(title))
+    : repositories; */
+
+  return response.json(repositories);
+
 });
 
 app.post("/repositories", (request, response) => {
-  // TODO
+  const { title, url, techs} = request.body;
+
+  const repository = {id: uuid(), title, url, techs, likes:0,};
+
+  repositories.push(repository);
+
+  return response.json(repository);
 });
 
 app.put("/repositories/:id", (request, response) => {
-  // TODO
+  const {id} = request.params;
+
+  const { title, url, techs} = request.body;
+
+ const RepositoryIndex = repositories.findIndex(repository => repository.id === id);
+ 
+ if(RepositoryIndex === -1) {
+   return response.status(400).json({ error: 'Repository does not exists!' });
+ }
+
+    const repository = {
+      id,
+      title, 
+      url, 
+      techs,
+      likes: repositories[RepositoryIndex].likes,
+    };
+
+  repositories[RepositoryIndex] = repository;
+  
+  return response.json(repository);
 });
 
 app.delete("/repositories/:id", (request, response) => {
-  // TODO
+  const {id} = request.params;
+
+  const RepositoryIndex = repositories.findIndex(repository => repository.id === id);
+
+  if (RepositoryIndex >= 0) {
+    repositories.splice(RepositoryIndex, 1);      
+  } else {
+    return response.status(400).json({ error: 'Repository does not exists.'})
+  }
+  return response.status(204).send();
 });
 
 app.post("/repositories/:id/like", (request, response) => {
-  // TODO
+  const { id } = request.params;
+
+  const RepositoryIndex = repositories.findIndex(repository => repository.id === id);
+
+  if(RepositoryIndex === -1) {
+    return response.status(400).json({ error: 'Repository does not exists!' });
+  }
+
+  repositories[RepositoryIndex].likes ++;
+
+  return response.json(repositories[RepositoryIndex]);
+
 });
 
 module.exports = app;
